@@ -13,19 +13,38 @@ if ($conn->connect_error) {
   die("Connection failed: " . $conn->connect_error);
 } 
 
-$stmt = $conn->prepare("INSERT INTO events (uvid, timedate, details, domain) VALUES (?, ?, ?, ?)");
-$stmt->bind_param("ssss", $uvid, $time, $details, $domain);
+$stmt = $conn->prepare("INSERT INTO events (uvid, timedate, details, domain, url, selector, x, y, type) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)");
+$stmt->bind_param("ssssssiis", $uvid, $time, $details, $domain, $url, $selector, $x, $y, $type);
 
 $uvid = "001";
-$time = date('Y-m-d H:i:s');
+// $time = date('Y-m-d H:i:s');
 $details = "{}";
-$domain = "example.com";
+$domain = $_SERVER['SERVER_NAME'];
 
-if ($stmt->execute() === TRUE) {
-    echo "New record created successfully";
-  } else {
-    echo "Error: " . $conn->error;
-  }
+$request = file_get_contents('php://input');
+$data = json_decode($request);
+//$data  = filter_input_array($data, FILTER_SANITIZE_FULL_SPECIAL_CHARS);
+
+$url = $_SERVER['HTTP_REFERER'];
+
+foreach ($data as $event) {
+
+    $type = $event->type;
+    $time = $event->time;
+    $selector = $event->selector;
+    $x = $event->x;
+    $y = $event->y;
+    
+    if ($stmt->execute() === TRUE) {
+        echo "New record created successfully";
+    } else {
+        echo "Error: " . $conn->error;
+    }
+}
+die();
+
+
+
 
 $stmt->close();
 $conn->close();
