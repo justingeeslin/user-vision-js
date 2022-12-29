@@ -1,8 +1,7 @@
 function log(e) {
     console.log('Click', e);
 }
-
-  
+ 
 document.body.addEventListener("click", log);
 
 document.addEventListener('visibilitychange', function logData() {
