@@ -1,24 +1,33 @@
 <?php
+ini_set('display_errors', '1');
+ini_set('display_startup_errors', '1');
+error_reporting(E_ALL);
 header('Access-Control-Allow-Origin: *');
-// header('Access-Control-Allow-Headers:  Content-Type, X-Auth-Token, Authorization, Origin');
-// header('Access-Control-Allow-Methods:  POST, PUT, GET');
 
-$GLOBALS['resultsFile'] = "results.csv";
+require('creds.php');
 
-// Sanitize input
-$_POST  = filter_input_array(INPUT_POST, FILTER_SANITIZE_FULL_SPECIAL_CHARS);
+// Create connection
+$conn = new mysqli($servername, $username, $password, $dbname);
+// Check connection
+if ($conn->connect_error) {
+  die("Connection failed: " . $conn->connect_error);
+} 
 
-function recordResults() {
-    echo "Recording results… "; 
-    $myfile = fopen($GLOBALS['resultsFile'], "a") or die("Unable to open file!");
-    $data = "Testing\n";
-    fwrite($myfile, $data);
-    echo "Done!";
-    fclose($myfile);
-}
+$stmt = $conn->prepare("INSERT INTO events (uvid, timedate, details, domain) VALUES (?, ?, ?, ?)");
+$stmt->bind_param("ssss", $uvid, $time, $details, $domain);
 
-recordResults();
+$uvid = "001";
+$time = date('Y-m-d H:i:s');
+$details = "{}";
+$domain = "example.com";
 
-echo "Saved2!";
+if ($stmt->execute() === TRUE) {
+    echo "New record created successfully";
+  } else {
+    echo "Error: " . $conn->error;
+  }
+
+$stmt->close();
+$conn->close();
 
 ?>
